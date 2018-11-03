@@ -4,7 +4,6 @@ import random
 import math
 from enum import Enum
 
- 
 pygame.init()
 pygame.font.init()
  
@@ -22,7 +21,6 @@ gameDisplay = pygame.display.set_mode((display_width,display_height))
 pygame.display.set_caption('ONU')
 clock = pygame.time.Clock()
  
-
 cardsSurface = pygame.image.load('UNO_cards_deck.png')
 cardsHighlight = pygame.image.load('UNO_cards_deck_brighter2.png')
 cardWidth = 240
@@ -42,7 +40,7 @@ class ClickableObj:
         self.h = rect[3]
         self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
 
-    # returns True if the mouse is hovering over this button
+    # returns True if the mouse is hovering over this object
     def hover(self):
         mouse = pygame.mouse.get_pos()
         return self.rect.collidepoint(mouse)
@@ -143,7 +141,7 @@ class Hand:
 
     def render(self,x,y):
         for i in range(0,self.getNumCards()):
-            offset = i * (cardWidthScaled+Hand.handSpacing)
+            offset = i * (cardWidthScaled + Hand.handSpacing)
             self.cards[i].render(x + offset, y)
 
     def addRandomCard(self):
@@ -166,11 +164,10 @@ class Button(ClickableObj):
             color_selected = self.color_inactive
         pygame.draw.rect(gameDisplay, color_selected, self.rect)
 
-        smallText = pygame.font.Font('freesansbold.ttf',20)
+        smallText = pygame.font.Font('sans.ttf',20)
         textSurf, textRect = text_objects(self.msg, smallText)
         textRect.center = ( (x+(w/2)), (y+(h/2)) )
         gameDisplay.blit(textSurf, textRect)
-
 
 card0 = Card(14,0)
 card1 = Card(0,0)
@@ -190,7 +187,6 @@ buttonDraw.msg = "Draw card"
 buttonDraw.color_inactive = green
 buttonDraw.color_active = bright_green
 buttonDraw.action = hand1.addRandomCard
-
 
 listButtons = []
 listButtons.append(buttonDraw)
@@ -214,7 +210,8 @@ def mainLoop():
                         break
                 
         gameDisplay.fill(white)
-        largeText = pygame.font.Font('freesansbold.ttf',30)
+        #largeText = pygame.font.Font('freesansbold.ttf',30)
+        largeText = pygame.font.Font('sans.ttf',30)
         
         TextSurf, TextRect = text_objects("some text", largeText)
         TextRect.center = (150,50)
@@ -225,7 +222,6 @@ def mainLoop():
 
         pygame.display.update()
         clock.tick(15)
-
 
 mainLoop()
 pygame.quit()
