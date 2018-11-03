@@ -4,35 +4,34 @@ import random
 import math
 from enum import Enum
 
- 
-pygame.init()
-pygame.font.init()
- 
-display_width = 800
-display_height = 600
- 
-black = (0,0,0)
-white = (255,255,255)
-red = (200,0,0)
-green = (0,200,0)
-bright_red = (255,0,0)
-bright_green = (0,255,0)
 
-gameDisplay = pygame.display.set_mode((display_width,display_height))
-pygame.display.set_caption('ONU')
-clock = pygame.time.Clock()
- 
+class GameUI:
+    display_width = 800
+    display_height = 600
+    # maximum frames per second
+    framerate = 15
+     
+    black = (0,0,0)
+    white = (255,255,255)
+    red = (200,0,0)
+    green = (0,200,0)
+    bright_red = (255,0,0)
+    bright_green = (0,255,0)
 
-cardsSurface = pygame.image.load('UNO_cards_deck.png')
-cardsHighlight = pygame.image.load('UNO_cards_deck_brighter2.png')
-cardWidth = 240
-cardHeight = 360
-cardScale = 0.3
-cardWidthScaled = math.floor(cardScale * cardWidth)
-cardHeightScaled = math.floor(cardScale * cardHeight)
-maxRank = 14
-maxColor = 3
+    gameDisplay = pygame.display.set_mode((display_width,display_height))
+    pygame.display.set_caption('ONU')
+    clock = pygame.time.Clock()
+     
+    cardsSurface = pygame.image.load('UNO_cards_deck.png')
+    cardsHighlight = pygame.image.load('UNO_cards_deck_brighter2.png')
+    cardWidth = 240
+    cardHeight = 360
+    cardScale = 0.3
+    cardWidthScaled = math.floor(cardScale * cardWidth)
+    cardHeightScaled = math.floor(cardScale * cardHeight)
 
+    # the amount of space between each card in the UI
+    handSpacing = math.floor(cardWidthScaled * 0.1)
 
 class ClickableObj:
     def __init__(self, rect):
@@ -42,7 +41,7 @@ class ClickableObj:
         self.h = rect[3]
         self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
 
-    # returns True if the mouse is hovering over this button
+    # returns True if the mouse is hovering over this object
     def hover(self):
         mouse = pygame.mouse.get_pos()
         return self.rect.collidepoint(mouse)
@@ -61,14 +60,17 @@ class ClickableObj:
 # 14: wild draw 4
 class Card(ClickableObj):
     curID = 0
-        
+    # constants
+    maxRank = 14
+    maxColor = 3
+
     def __init__(self, rank, color):
         self.id = Card.curID # unique identifier
         Card.curID += 1
         self.rank = rank
         self.color = color
         self.hand = None # reference to the hand this card belongs to
-        self.rect = pygame.Rect(0, 0, cardWidthScaled, cardHeightScaled)
+        self.rect = pygame.Rect(0, 0, GameUI.cardWidthScaled, GameUI.cardHeightScaled)
 
     def __str__(self):
         return "<Card rank={0}, color={1}>".format(self.rank, self.color)
@@ -84,6 +86,7 @@ class Card(ClickableObj):
         #print(self.hand)
         self.hand.removeCard(self)
 
+    # get the Coordintes of the card on the image
     def getCoords(self):
         if self.rank == 14:
             # special case for wild draw 4
@@ -94,27 +97,27 @@ class Card(ClickableObj):
             y = self.color
         pixelAdjust = 2 # need to add small amount to avoid cut-off edges
         # x_offset, y_offset, width, height
-        return pygame.Rect(cardWidth*x, cardHeight*y, cardWidth+pixelAdjust, cardHeight+pixelAdjust)
+        w = GameUI.cardWidth
+        h = GameUI.cardHeight
+        return pygame.Rect(w*x, h*y, w+pixelAdjust, h+pixelAdjust)
 
     def render(self, x, y):
-        self.rect = pygame.Rect(x, y, cardWidthScaled, cardHeightScaled)
+        self.rect = pygame.Rect(x, y, GameUI.cardWidthScaled, GameUI.cardHeightScaled)
         if self.hover():
-            surfaceSelected = cardsHighlight
+            surfaceSelected = GameUI.cardsHighlight
         else:
-            surfaceSelected = cardsSurface
+            surfaceSelected = GameUI.cardsSurface
 
         cropped = surfaceSelected.subsurface(self.getCoords()).copy()
-        cropped = pygame.transform.smoothscale(cropped, (cardWidthScaled, cardHeightScaled))
-        gameDisplay.blit(cropped, (x,y))
+        cropped = pygame.transform.smoothscale(cropped, (GameUI.cardWidthScaled, GameUI.cardHeightScaled))
+        GameUI.gameDisplay.blit(cropped, (x,y))
 
     def getRandomCard():
-        r = random.randint(0, maxRank)
-        c = random.randint(0, maxColor)
+        r = random.randint(0, Card.maxRank)
+        c = random.randint(0, Card.maxColor)
         return Card(r,c)
 
 class Hand:
-    handSpacing = math.floor(cardWidthScaled * 0.1)
-
     def __init__(self):
         self.cards = []
 
@@ -129,28 +132,28 @@ class Hand:
     def getNumCards(self):
         return len(self.cards)
 
-    def addCard(self,c):
+    def addCard(self, c):
         c.hand = self
         self.cards.append(c)
         #print("numCards={}".format(self.getNumCards()))
 
-    def removeCard(self,c):
+    def removeCard(self, c):
         for i in range(0,self.getNumCards()):
             curCard = self.cards[i]
             if curCard == c:
                 del self.cards[i]
                 break
 
-    def render(self,x,y):
+    def render(self, x, y):
         for i in range(0,self.getNumCards()):
-            offset = i * (cardWidthScaled+Hand.handSpacing)
+            offset = i * (GameUI.cardWidthScaled + GameUI.handSpacing)
             self.cards[i].render(x + offset, y)
 
     def addRandomCard(self):
         self.addCard(Card.getRandomCard())
 
 def text_objects(text, font):
-    textSurface = font.render(text, True, black)
+    textSurface = font.render(text, True, GameUI.black)
     return textSurface, textSurface.get_rect()
 
 class Button(ClickableObj):
@@ -164,33 +167,27 @@ class Button(ClickableObj):
             color_selected = self.color_active
         else:
             color_selected = self.color_inactive
-        pygame.draw.rect(gameDisplay, color_selected, self.rect)
+        pygame.draw.rect(GameUI.gameDisplay, color_selected, self.rect)
 
-        smallText = pygame.font.Font('freesansbold.ttf',20)
+        smallText = pygame.font.Font('sans.ttf',20)
         textSurf, textRect = text_objects(self.msg, smallText)
         textRect.center = ( (x+(w/2)), (y+(h/2)) )
-        gameDisplay.blit(textSurf, textRect)
+        GameUI.gameDisplay.blit(textSurf, textRect)
 
-
-card0 = Card(14,0)
-card1 = Card(0,0)
-card2 = Card(4,1)
-card3 = Card(12,2)
 
 hand1 = Hand()
-hand1.addCard(card0)
-hand1.addCard(card1)
-hand1.addCard(card2)
-hand1.addCard(card3)
+hand1.addCard(Card(14,0))
+hand1.addCard(Card(0,0))
+hand1.addCard(Card(4,1))
+hand1.addCard(Card(12,2))
 
 playerHand = hand1
 
 buttonDraw = Button((0,350,120,50))
 buttonDraw.msg = "Draw card"
-buttonDraw.color_inactive = green
-buttonDraw.color_active = bright_green
+buttonDraw.color_inactive = GameUI.green
+buttonDraw.color_active = GameUI.bright_green
 buttonDraw.action = hand1.addRandomCard
-
 
 listButtons = []
 listButtons.append(buttonDraw)
@@ -213,20 +210,23 @@ def mainLoop():
                         x.action()
                         break
                 
-        gameDisplay.fill(white)
-        largeText = pygame.font.Font('freesansbold.ttf',30)
+        GameUI.gameDisplay.fill(GameUI.white)
+        #largeText = pygame.font.Font('freesansbold.ttf',30)
+        largeText = pygame.font.Font('sans.ttf',30)
         
         TextSurf, TextRect = text_objects("some text", largeText)
         TextRect.center = (150,50)
-        gameDisplay.blit(TextSurf, TextRect)
+        GameUI.gameDisplay.blit(TextSurf, TextRect)
 
         hand1.render(0,450)
         buttonDraw.render()
 
         pygame.display.update()
-        clock.tick(15)
+        GameUI.clock.tick(GameUI.framerate)
 
 
+pygame.init()
+pygame.font.init()
 mainLoop()
 pygame.quit()
 quit()
