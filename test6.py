@@ -1,14 +1,10 @@
-
 class Card:
-    def __init__(self, rank, color):
-        self.rank = rank
-        self.color = color
+    curID = 0
+    def __init__(self):
+        self.id = Card.curID
+        Card.curID += 1
 
-    def __str__(self):
-        return "<Card rank={0}, color={1}>".format(self.rank, self.color)
-
-    def clickEvent(self):
-        print("Card clicked: {0}".format(self))
-
-c = Card(4,4)
-c.clickEvent()
+a = Card()
+b = Card()
+print(a.id)
+print(b.id)
