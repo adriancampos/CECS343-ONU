@@ -62,8 +62,6 @@ class Card:
         return pygame.Rect(cardWidth*x, cardHeight*y, cardWidth, cardHeight)
 
     def draw(self, x, y):
-        #surfaceSelected = 0
-
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
         if x+cardWidthScaled > mouse[0] > x and y+cardHeightScaled > mouse[1] > y:
