@@ -5,8 +5,8 @@ import math
 from enum import Enum
 
 class GameUI:
-    display_width = 800
-    display_height = 600
+    displayWidth = 800
+    displayHeight = 600
     # maximum frames per second
     framerate = 15
      
@@ -14,12 +14,12 @@ class GameUI:
     white = (255,255,255)
     red = (200,0,0)
     green = (0,200,0)
-    bright_red = (255,0,0)
-    bright_green = (0,255,0)
-    bright_blue = (0,0,255)
-    bright_yellow = (255,255,0)
+    brightRed = (255,0,0)
+    brightGreen = (0,255,0)
+    brightBlue = (0,0,255)
+    brightYellow = (255,255,0)
 
-    gameDisplay = pygame.display.set_mode((display_width,display_height))
+    gameDisplay = pygame.display.set_mode((displayWidth,displayHeight))
     pygame.display.set_caption('ONU')
     clock = pygame.time.Clock()
      
@@ -53,7 +53,7 @@ class GameUI:
         GameUI.buttonDraw = Button((0,350,120,50))
         GameUI.buttonDraw.msg = "Draw card"
         GameUI.buttonDraw.color_inactive = GameUI.green
-        GameUI.buttonDraw.color_active = GameUI.bright_green
+        GameUI.buttonDraw.color_active = GameUI.brightGreen
         GameUI.buttonDraw.action = GameUI.hand1.addRandomCard
 
         GameUI.listButtons = []
@@ -77,17 +77,11 @@ class GameUI:
                             break
                     
             GameUI.gameDisplay.fill(GameUI.white)
-    
-            #largeText = pygame.font.Font('sans.ttf',30)
-            #TextSurf, TextRect = GameUI.textObjects("some text", largeText)
-            #TextRect.center = (150,50)
-            #GameUI.gameDisplay.blit(TextSurf, TextRect)
 
             GameUI.hand1.render(0,450)
             GameUI.buttonDraw.render()
             GameUI.discardPile.render(300,200)
             GameUI.errorMsg.render(250,50)
-
 
             pygame.display.update()
             GameUI.clock.tick(GameUI.framerate)
@@ -223,13 +217,13 @@ class DiscardPile:
 
     def numToColor(n):
         if n == 0:
-            return GameUI.bright_red
+            return GameUI.brightRed
         elif n == 1:
-            return GameUI.bright_yellow
+            return GameUI.brightYellow
         elif n == 2:
-            return GameUI.bright_green
+            return GameUI.brightGreen
         elif n == 3:
-            return GameUI.bright_blue
+            return GameUI.brightBlue
 
     def render(self, x, y):
         if self.topCard is None:
