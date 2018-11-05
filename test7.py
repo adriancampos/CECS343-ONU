@@ -4,7 +4,6 @@ import random
 import math
 from enum import Enum
 
-
 class GameUI:
     display_width = 800
     display_height = 600
@@ -32,6 +31,59 @@ class GameUI:
 
     # the amount of space between each card in the UI
     handSpacing = math.floor(cardWidthScaled * 0.1)
+
+    def textObjects(text, font):
+        textSurface = font.render(text, True, GameUI.black)
+        return textSurface, textSurface.get_rect()
+
+    def initGame():
+        GameUI.hand1 = Hand()
+        GameUI.hand1.addCard(Card(14,0))
+        GameUI.hand1.addCard(Card(0,0))
+        GameUI.hand1.addCard(Card(4,1))
+        GameUI.hand1.addCard(Card(12,2))
+
+        GameUI.playerHand = GameUI.hand1
+
+        GameUI.buttonDraw = Button((0,350,120,50))
+        GameUI.buttonDraw.msg = "Draw card"
+        GameUI.buttonDraw.color_inactive = GameUI.green
+        GameUI.buttonDraw.color_active = GameUI.bright_green
+        GameUI.buttonDraw.action = GameUI.hand1.addRandomCard
+
+        GameUI.listButtons = []
+        GameUI.listButtons.append(GameUI.buttonDraw)
+
+    def mainLoop():
+        intro = True
+
+        while intro:
+            for event in pygame.event.get():
+                #print(event)
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    listClickableObjects = GameUI.listButtons + GameUI.playerHand.cards
+                    for x in listClickableObjects:
+                        if x.hover():
+                            x.action()
+                            break
+                    
+            GameUI.gameDisplay.fill(GameUI.white)
+            #largeText = pygame.font.Font('freesansbold.ttf',30)
+            largeText = pygame.font.Font('sans.ttf',30)
+            
+            TextSurf, TextRect = GameUI.textObjects("some text", largeText)
+            TextRect.center = (150,50)
+            GameUI.gameDisplay.blit(TextSurf, TextRect)
+
+            GameUI.hand1.render(0,450)
+            GameUI.buttonDraw.render()
+
+            pygame.display.update()
+            GameUI.clock.tick(GameUI.framerate)
 
 class ClickableObj:
     def __init__(self, rect):
@@ -152,10 +204,6 @@ class Hand:
     def addRandomCard(self):
         self.addCard(Card.getRandomCard())
 
-def text_objects(text, font):
-    textSurface = font.render(text, True, GameUI.black)
-    return textSurface, textSurface.get_rect()
-
 class Button(ClickableObj):
     def __init__(self, rect):
         ClickableObj.__init__(self, rect)
@@ -170,63 +218,17 @@ class Button(ClickableObj):
         pygame.draw.rect(GameUI.gameDisplay, color_selected, self.rect)
 
         smallText = pygame.font.Font('sans.ttf',20)
-        textSurf, textRect = text_objects(self.msg, smallText)
+        textSurf, textRect = GameUI.textObjects(self.msg, smallText)
         textRect.center = ( (x+(w/2)), (y+(h/2)) )
         GameUI.gameDisplay.blit(textSurf, textRect)
 
+def main():
+    pygame.init()
+    pygame.font.init()
 
-hand1 = Hand()
-hand1.addCard(Card(14,0))
-hand1.addCard(Card(0,0))
-hand1.addCard(Card(4,1))
-hand1.addCard(Card(12,2))
+    GameUI.initGame()
+    GameUI.mainLoop()
 
-playerHand = hand1
+    pygame.quit()
 
-buttonDraw = Button((0,350,120,50))
-buttonDraw.msg = "Draw card"
-buttonDraw.color_inactive = GameUI.green
-buttonDraw.color_active = GameUI.bright_green
-buttonDraw.action = hand1.addRandomCard
-
-listButtons = []
-listButtons.append(buttonDraw)
- 
-
-def mainLoop():
-    intro = True
-
-    while intro:
-        for event in pygame.event.get():
-            #print(event)
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                listClickableObjects = listButtons + playerHand.cards
-                for x in listClickableObjects:
-                    if x.hover():
-                        x.action()
-                        break
-                
-        GameUI.gameDisplay.fill(GameUI.white)
-        #largeText = pygame.font.Font('freesansbold.ttf',30)
-        largeText = pygame.font.Font('sans.ttf',30)
-        
-        TextSurf, TextRect = text_objects("some text", largeText)
-        TextRect.center = (150,50)
-        GameUI.gameDisplay.blit(TextSurf, TextRect)
-
-        hand1.render(0,450)
-        buttonDraw.render()
-
-        pygame.display.update()
-        GameUI.clock.tick(GameUI.framerate)
-
-
-pygame.init()
-pygame.font.init()
-mainLoop()
-pygame.quit()
-quit()
+main()

@@ -16,6 +16,8 @@ class GameUI:
     green = (0,200,0)
     bright_red = (255,0,0)
     bright_green = (0,255,0)
+    bright_blue = (0,0,255)
+    bright_yellow = (255,255,0)
 
     gameDisplay = pygame.display.set_mode((display_width,display_height))
     pygame.display.set_caption('ONU')
@@ -37,6 +39,9 @@ class GameUI:
         return textSurface, textSurface.get_rect()
 
     def initGame():
+        GameUI.errorMsg = ErrorMessage("")
+        GameUI.discardPile = DiscardPile()
+
         GameUI.hand1 = Hand()
         GameUI.hand1.addCard(Card(14,0))
         GameUI.hand1.addCard(Card(0,0))
@@ -72,18 +77,33 @@ class GameUI:
                             break
                     
             GameUI.gameDisplay.fill(GameUI.white)
-            #largeText = pygame.font.Font('freesansbold.ttf',30)
-            largeText = pygame.font.Font('sans.ttf',30)
-            
-            TextSurf, TextRect = GameUI.textObjects("some text", largeText)
-            TextRect.center = (150,50)
-            GameUI.gameDisplay.blit(TextSurf, TextRect)
+    
+            #largeText = pygame.font.Font('sans.ttf',30)
+            #TextSurf, TextRect = GameUI.textObjects("some text", largeText)
+            #TextRect.center = (150,50)
+            #GameUI.gameDisplay.blit(TextSurf, TextRect)
 
             GameUI.hand1.render(0,450)
             GameUI.buttonDraw.render()
+            GameUI.discardPile.render(300,200)
+            GameUI.errorMsg.render(250,50)
+
 
             pygame.display.update()
             GameUI.clock.tick(GameUI.framerate)
+
+class ErrorMessage:
+    def __init__(self, msg):
+        self.msg = msg
+
+    def render(self, x, y):
+        largeText = pygame.font.Font('sans.ttf', 30)
+        TextSurf, TextRect = GameUI.textObjects(self.msg, largeText)
+        TextRect.center = (x, y)
+        GameUI.gameDisplay.blit(TextSurf, TextRect)
+
+    def changeMsg(self, m):
+        self.msg = m
 
 class ClickableObj:
     def __init__(self, rect):
@@ -133,10 +153,19 @@ class Card(ClickableObj):
     def __ne__(self, other):
         return not (self == other)
 
+    def isWild(self):
+        return (self.rank == 13) or (self.rank == 14)
+
+    # the action to execute when the card is clicked
     def action(self):
-        print("Card clicked: {0}".format(self))
-        #print(self.hand)
-        self.hand.removeCard(self)
+        #print("Card clicked: {0}".format(self))
+
+        if GameUI.discardPile.isCardPlayable(self):
+            self.hand.removeCard(self)
+            GameUI.discardPile.addCard(self)
+            GameUI.errorMsg.changeMsg("")
+        else:
+            GameUI.errorMsg.changeMsg("Error: that card is not playable!")
 
     # get the Coordintes of the card on the image
     def getCoords(self):
@@ -168,6 +197,49 @@ class Card(ClickableObj):
         r = random.randint(0, Card.maxRank)
         c = random.randint(0, Card.maxColor)
         return Card(r,c)
+
+class DiscardPile:
+    # size of the border around the discard pile
+    borderSize = math.floor(GameUI.cardWidthScaled * 0.1)
+
+    def __init__(self):
+        self.topCard = None
+        self.currentColor = None
+
+    def addCard(self, c):
+        self.topCard = c
+        if c.isWild():
+            self.currentColor = 0
+        else:
+            self.currentColor = c.color
+
+    def isCardPlayable(self, c):
+        if self.topCard is None:
+            return True
+        elif c.isWild():
+            return True
+        else:
+            return (self.currentColor == c.color) or (self.topCard.rank == c.rank)
+
+    def numToColor(n):
+        if n == 0:
+            return GameUI.bright_red
+        elif n == 1:
+            return GameUI.bright_yellow
+        elif n == 2:
+            return GameUI.bright_green
+        elif n == 3:
+            return GameUI.bright_blue
+
+    def render(self, x, y):
+        if self.topCard is None:
+            return
+        b = DiscardPile.borderSize
+        w = GameUI.cardWidthScaled
+        h = GameUI.cardHeightScaled
+        col = DiscardPile.numToColor(self.currentColor)
+        pygame.draw.rect(GameUI.gameDisplay, col, (x-b,y-b,w+2*b,h+2*b))
+        self.topCard.render(x, y)
 
 class Hand:
     def __init__(self):
