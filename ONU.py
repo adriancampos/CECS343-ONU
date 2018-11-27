@@ -6,7 +6,7 @@ from enum import Enum
 
 class GameUI:
     displayWidth = 800
-    displayHeight = 600
+    displayHeight = 700
     # maximum frames per second
     framerate = 15
      
@@ -27,7 +27,7 @@ class GameUI:
     cardsHighlight = pygame.image.load('UNO_cards_deck_brighter2.png')
     cardWidth = 240
     cardHeight = 360
-    cardScale = 0.3
+    cardScale = 0.2
     cardWidthScaled = math.floor(cardScale * cardWidth)
     cardHeightScaled = math.floor(cardScale * cardHeight)
 
@@ -47,6 +47,12 @@ class GameUI:
         GameUI.hand1.addCard(Card(0,0))
         GameUI.hand1.addCard(Card(4,1))
         GameUI.hand1.addCard(Card(12,2))
+
+        GameUI.hand2 = Hand()
+        GameUI.hand2.addCard(Card(14,0))
+        GameUI.hand2.addCard(Card(0,0))
+        GameUI.hand2.addCard(Card(4,1))
+        GameUI.hand2.addCard(Card(12,2))
 
         GameUI.playerHand = GameUI.hand1
 
@@ -79,9 +85,10 @@ class GameUI:
             GameUI.gameDisplay.fill(GameUI.white)
 
             GameUI.hand1.render(0,450)
+            GameUI.hand2.render(0,50)
             GameUI.buttonDraw.render()
             GameUI.discardPile.render(300,200)
-            GameUI.errorMsg.render(250,50)
+            GameUI.errorMsg.render(300,250)
 
             pygame.display.update()
             GameUI.clock.tick(GameUI.framerate)
@@ -112,7 +119,8 @@ class ClickableObj:
         mouse = pygame.mouse.get_pos()
         return self.rect.collidepoint(mouse)
 
-    # override this function in the subclasses
+    # action to perform when clicked.
+    # override this function in the subclasses.
     def action(self):
         pass
 
@@ -263,9 +271,14 @@ class Hand:
                 break
 
     def render(self, x, y):
-        for i in range(0,self.getNumCards()):
-            offset = i * (GameUI.cardWidthScaled + GameUI.handSpacing)
-            self.cards[i].render(x + offset, y)
+        CARDS_PER_ROW = 10
+        for i in range(0, self.getNumCards()):
+            x_multiplier = GameUI.cardWidthScaled + GameUI.handSpacing
+            y_multiplier = GameUI.cardHeightScaled + GameUI.handSpacing
+            x_offset = i % CARDS_PER_ROW
+            y_offset = i // CARDS_PER_ROW
+            self.cards[i].render(x + x_offset*x_multiplier,
+                y + y_offset*y_multiplier)
 
     def addRandomCard(self):
         self.addCard(Card.getRandomCard())
