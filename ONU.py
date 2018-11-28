@@ -73,21 +73,23 @@ class GameUI:
 
         GameUI.aiplayer = AIPlayer(GameUI.hand2)
 
+    def render():
+        GameUI.gameDisplay.fill(GameUI.white)
+
+        GameUI.hand1.render(0, 450)
+        GameUI.hand2.render(0, 50)
+        GameUI.buttonDraw.render()
+        GameUI.discardPile.render(300, 200)
+        GameUI.errorMsg.render(300, 250)
+
+        pygame.display.update()
+        # GameUI.clock.tick(GameUI.framerate)
 
     def mainLoop():
         intro = True
 
         while intro:
-            GameUI.gameDisplay.fill(GameUI.white)
-
-            GameUI.hand1.render(0,450)
-            GameUI.hand2.render(0,50)
-            GameUI.buttonDraw.render()
-            GameUI.discardPile.render(300,200)
-            GameUI.errorMsg.render(300,250)
-
-            pygame.display.update()
-            GameUI.clock.tick(GameUI.framerate)
+            GameUI.render()
 
             currentHand = GameUI.handList[GameUI.currentHandIndex]
 
@@ -107,9 +109,6 @@ class GameUI:
                                 break
             elif currentHand == GameUI.aiplayer.hand:
                 GameUI.aiplayer.perform_turn()
-                # Increment turn
-                GameUI.currentHandIndex += 1
-                GameUI.currentHandIndex %= len(GameUI.handList)
 
 
 
@@ -230,14 +229,30 @@ class AIPlayer:
 
     def perform_turn(self):
 
-        # add a delay
+        # add a delay for good looks
         pygame.time.wait(random.randrange(400, 1500))
 
-        # Choose the very first card. We'll do validation later
-        selectedcard = self.hand.cards[0]
+        selectedcard = None
+
+        # Look for a playable card in the hand
+        for card in self.hand.cards:
+            if GameUI.discardPile.isCardPlayable(card):
+                selectedcard = card
+
+        # Keep drawing until we've got a playable card
+        while not selectedcard:
+            tempcard = self.hand.addRandomCard()
+            GameUI.render()
+            pygame.time.wait(random.randrange(400, 600))
+            if GameUI.discardPile.isCardPlayable(tempcard):
+                selectedcard = tempcard
 
         self.hand.removeCard(selectedcard)
         GameUI.discardPile.addCard(selectedcard)
+
+        # Increment turn
+        GameUI.currentHandIndex += 1
+        GameUI.currentHandIndex %= len(GameUI.handList)
 
 
 class DiscardPile:
@@ -321,7 +336,9 @@ class Hand:
                 y + y_offset*y_multiplier)
 
     def addRandomCard(self):
-        self.addCard(Card.getRandomCard())
+        tempcard = Card.getRandomCard()
+        self.addCard(tempcard)
+        return tempcard
 
 class Button(ClickableObj):
     def __init__(self, rect):
