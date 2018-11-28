@@ -6,10 +6,13 @@ Implemented so far:
 * Discard pile  
 * Card validation - is card playable  
 * AI player 
+* Player turn indicator, player names
+* When rendering hand, there might be more than 1 row of cards. Must specify the amount of cards in each row
 
 Things to implement:   
 * For wild cards, must have UI element for player to select the color  
-* When rendering hand, there might be more than 1 row of cards. Must specify the amount of cards in each row
 * Announce ONU
 * End of game detection
-* Player turn indicator, player names
+* Draw 2 functionality, etc.
+* Change wild card to random color selection
+
