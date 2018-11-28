@@ -41,9 +41,9 @@ class GameUI:
     # Number of cards in hand at the start of the game
     numCardsStart = 7
 
-    handList = []
     currentHandIndex = 0
     currentHand = None
+    gameWinner = None
 
     tableW = tableSurface.get_width()
     tableH = tableSurface.get_height()
@@ -57,7 +57,7 @@ class GameUI:
         textSurface = font.render(text, True, color)
         return textSurface, textSurface.get_rect()
 
-    def initGame():
+    def initHands():
         GameUI.errorMsg = ErrorMessage("")
         GameUI.discardPile = DiscardPile()
 
@@ -68,20 +68,30 @@ class GameUI:
         GameUI.hand2.dealCards()        
         
         GameUI.playerHand = GameUI.hand1
+        GameUI.aiplayer = AIPlayer(GameUI.hand2)
 
+        GameUI.handList = []
+        GameUI.handList.append(GameUI.hand1)
+        GameUI.handList.append(GameUI.hand2)
+
+    def initGame():
+        GameUI.initHands()
+        
         GameUI.buttonDraw = Button((0,350,120,50))
         GameUI.buttonDraw.msg = "Draw card"
         GameUI.buttonDraw.color_inactive = GameUI.green
         GameUI.buttonDraw.color_active = GameUI.brightGreen
         GameUI.buttonDraw.action = GameUI.hand1.addRandomCard
 
+        GameUI.buttonNewGame = Button((GameUI.discardX ,350,120,50))
+        GameUI.buttonNewGame.msg = "New game"
+        GameUI.buttonNewGame.color_inactive = GameUI.green
+        GameUI.buttonNewGame.color_active = GameUI.brightGreen
+        GameUI.buttonNewGame.action = GameUI.initHands
+
         GameUI.listButtons = []
         GameUI.listButtons.append(GameUI.buttonDraw)
-
-        GameUI.handList.append(GameUI.hand1)
-        GameUI.handList.append(GameUI.hand2)
-
-        GameUI.aiplayer = AIPlayer(GameUI.hand2)
+        GameUI.listButtons.append(GameUI.buttonNewGame)
 
     def render():
         GameUI.gameDisplay.fill(GameUI.backgroundColor)
@@ -93,10 +103,15 @@ class GameUI:
         GameUI.buttonDraw.render()
         #GameUI.discardPile.render(300, 200)
         GameUI.discardPile.render(GameUI.discardX, GameUI.discardY)
-        GameUI.errorMsg.render(300, 250)
+        GameUI.errorMsg.render(GameUI.displayWidth // 2, GameUI.displayHeight // 2)
 
-        pygame.display.update()
+        #pygame.display.update()
         # GameUI.clock.tick(GameUI.framerate)
+
+    def renderWinOverlay():
+        GameUI.errorMsg.changeMsg("Player X won the game!")
+        GameUI.buttonNewGame.render()
+        pygame.display.update()
 
     def incrementTurn():
         GameUI.currentHandIndex += 1
@@ -108,6 +123,9 @@ class GameUI:
 
         while intro:
             GameUI.render()
+            if GameUI.gameWinner is not None:
+                GameUI.renderWinOverlay()
+            pygame.display.update()
 
             GameUI.currentHand = GameUI.handList[GameUI.currentHandIndex]
 
@@ -246,6 +264,7 @@ class AIPlayer:
 
     def perform_turn(self):
         GameUI.render()
+        pygame.display.update()
         
         # add a delay for good looks
         pygame.time.wait(random.randrange(500, 501))
@@ -261,6 +280,7 @@ class AIPlayer:
         while not selectedcard:
             tempcard = self.hand.addRandomCard()
             GameUI.render()
+            pygame.display.update()
             pygame.time.wait(random.randrange(500, 501))
             if GameUI.discardPile.isCardPlayable(tempcard):
                 selectedcard = tempcard
