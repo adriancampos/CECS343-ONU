@@ -18,6 +18,7 @@ class GameUI:
     brightGreen = (0,255,0)
     brightBlue = (0,0,255)
     brightYellow = (255,255,0)
+    backgroundColor = (6,60,6)
 
     gameDisplay = pygame.display.set_mode((displayWidth,displayHeight))
     pygame.display.set_caption('ONU')
@@ -25,6 +26,7 @@ class GameUI:
      
     cardsSurface = pygame.image.load('UNO_cards_deck.png')
     cardsHighlight = pygame.image.load('UNO_cards_deck_brighter2.png')
+    tableSurface = pygame.image.load('poker_table.png')
     cardWidth = 240
     cardHeight = 360
     cardScale = 0.2
@@ -74,12 +76,22 @@ class GameUI:
         GameUI.aiplayer = AIPlayer(GameUI.hand2)
 
     def render():
-        GameUI.gameDisplay.fill(GameUI.white)
+        GameUI.gameDisplay.fill(GameUI.backgroundColor)
+
+        tableW = GameUI.tableSurface.get_width()
+        tableH = GameUI.tableSurface.get_height()
+        tableX = (GameUI.displayWidth - tableW) // 2
+        tableY = (GameUI.displayHeight - tableH) // 2
+        GameUI.gameDisplay.blit(GameUI.tableSurface, (tableX,tableY))
+
+        discardX = tableX + tableW // 2 - GameUI.cardWidthScaled // 2
+        discardY = tableY + tableH // 2 - GameUI.cardHeightScaled // 2
 
         GameUI.hand1.render(0, 450)
         GameUI.hand2.render(0, 50)
         GameUI.buttonDraw.render()
-        GameUI.discardPile.render(300, 200)
+        #GameUI.discardPile.render(300, 200)
+        GameUI.discardPile.render(discardX, discardY)
         GameUI.errorMsg.render(300, 250)
 
         pygame.display.update()
@@ -123,7 +135,7 @@ class ErrorMessage:
 
     def render(self, x, y):
         largeText = pygame.font.Font('sans.ttf', 30)
-        TextSurf, TextRect = GameUI.textObjects(self.msg, largeText, GameUI.black)
+        TextSurf, TextRect = GameUI.textObjects(self.msg, largeText, GameUI.white)
         TextRect.center = (x, y)
         GameUI.gameDisplay.blit(TextSurf, TextRect)
 
@@ -346,7 +358,7 @@ class Hand:
         if GameUI.currentHand == self:
             textColor = GameUI.brightRed
         else:
-            textColor = GameUI.black
+            textColor = GameUI.white
 
         # render the name
         smallText = pygame.font.Font('sans.ttf',20)
