@@ -36,22 +36,23 @@ class GameUI:
 
     handList = []
     currentHandIndex = 0
+    currentHand = None
 
-    def textObjects(text, font):
-        textSurface = font.render(text, True, GameUI.black)
+    def textObjects(text, font, color):
+        textSurface = font.render(text, True, color)
         return textSurface, textSurface.get_rect()
 
     def initGame():
         GameUI.errorMsg = ErrorMessage("")
         GameUI.discardPile = DiscardPile()
 
-        GameUI.hand1 = Hand()
+        GameUI.hand1 = Hand("Player")
         GameUI.hand1.addCard(Card(14,0))
         GameUI.hand1.addCard(Card(0,0))
         GameUI.hand1.addCard(Card(4,1))
         GameUI.hand1.addCard(Card(12,2))
 
-        GameUI.hand2 = Hand()
+        GameUI.hand2 = Hand("Robot")
         GameUI.hand2.addCard(Card(14,0))
         GameUI.hand2.addCard(Card(0,0))
         GameUI.hand2.addCard(Card(4,1))
@@ -85,15 +86,20 @@ class GameUI:
         pygame.display.update()
         # GameUI.clock.tick(GameUI.framerate)
 
+    def incrementTurn():
+        GameUI.currentHand = GameUI.handList[GameUI.currentHandIndex]
+        GameUI.currentHandIndex += 1
+        GameUI.currentHandIndex %= len(GameUI.handList)
+
     def mainLoop():
         intro = True
 
         while intro:
             GameUI.render()
 
-            currentHand = GameUI.handList[GameUI.currentHandIndex]
+            GameUI.currentHand = GameUI.handList[GameUI.currentHandIndex]
 
-            if currentHand == GameUI.playerHand:
+            if GameUI.currentHand == GameUI.playerHand:
                 for event in pygame.event.get():
                     # print(event)
                     if event.type == pygame.QUIT:
@@ -107,7 +113,7 @@ class GameUI:
                             if x.hover():
                                 x.action()
                                 break
-            elif currentHand == GameUI.aiplayer.hand:
+            elif GameUI.currentHand == GameUI.aiplayer.hand:
                 GameUI.aiplayer.perform_turn()
 
 
@@ -118,7 +124,7 @@ class ErrorMessage:
 
     def render(self, x, y):
         largeText = pygame.font.Font('sans.ttf', 30)
-        TextSurf, TextRect = GameUI.textObjects(self.msg, largeText)
+        TextSurf, TextRect = GameUI.textObjects(self.msg, largeText, GameUI.black)
         TextRect.center = (x, y)
         GameUI.gameDisplay.blit(TextSurf, TextRect)
 
@@ -187,8 +193,7 @@ class Card(ClickableObj):
             GameUI.errorMsg.changeMsg("")
 
             # Increment turn
-            GameUI.currentHandIndex += 1
-            GameUI.currentHandIndex %= len(GameUI.handList)
+            GameUI.incrementTurn()
         else:
             GameUI.errorMsg.changeMsg("Error: that card is not playable!")
 
@@ -228,7 +233,8 @@ class AIPlayer:
         self.hand = hand
 
     def perform_turn(self):
-
+        GameUI.render()
+        
         # add a delay for good looks
         pygame.time.wait(random.randrange(400, 1500))
 
@@ -251,8 +257,7 @@ class AIPlayer:
         GameUI.discardPile.addCard(selectedcard)
 
         # Increment turn
-        GameUI.currentHandIndex += 1
-        GameUI.currentHandIndex %= len(GameUI.handList)
+        GameUI.incrementTurn()
 
 
 class DiscardPile:
@@ -299,8 +304,9 @@ class DiscardPile:
         self.topCard.render(x, y)
 
 class Hand:
-    def __init__(self):
+    def __init__(self, name):
         self.cards = []
+        self.name = name
 
     def __str__(self):
         ret = "<Hand "
@@ -335,6 +341,18 @@ class Hand:
             self.cards[i].render(x + x_offset*x_multiplier,
                 y + y_offset*y_multiplier)
 
+        if GameUI.currentHand == self:
+            textColor = GameUI.brightRed
+        else:
+            textColor = GameUI.black
+
+        # render the name
+        smallText = pygame.font.Font('sans.ttf',20)
+        textSurf, textRect = GameUI.textObjects(self.name, smallText, textColor)
+        textRect.left = x
+        textRect.bottom = y
+        GameUI.gameDisplay.blit(textSurf, textRect)
+
     def addRandomCard(self):
         tempcard = Card.getRandomCard()
         self.addCard(tempcard)
@@ -354,7 +372,7 @@ class Button(ClickableObj):
         pygame.draw.rect(GameUI.gameDisplay, color_selected, self.rect)
 
         smallText = pygame.font.Font('sans.ttf',20)
-        textSurf, textRect = GameUI.textObjects(self.msg, smallText)
+        textSurf, textRect = GameUI.textObjects(self.msg, smallText, GameUI.black)
         textRect.center = ( (x+(w/2)), (y+(h/2)) )
         GameUI.gameDisplay.blit(textSurf, textRect)
 
