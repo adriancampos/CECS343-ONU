@@ -18,7 +18,7 @@ class GameUI:
     brightGreen = (0,255,0)
     brightBlue = (0,0,255)
     brightYellow = (255,255,0)
-    backgroundColor = (6,60,6)
+    backgroundColor = (15,40,15)
 
     gameDisplay = pygame.display.set_mode((displayWidth,displayHeight))
     pygame.display.set_caption('ONU')
@@ -44,6 +44,14 @@ class GameUI:
     handList = []
     currentHandIndex = 0
     currentHand = None
+
+    tableW = tableSurface.get_width()
+    tableH = tableSurface.get_height()
+    tableX = (displayWidth - tableW) // 2
+    tableY = (displayHeight - tableH) // 2
+
+    discardX = tableX + tableW // 2 - cardWidthScaled // 2
+    discardY = tableY + tableH // 2 - cardHeightScaled // 2
 
     def textObjects(text, font, color):
         textSurface = font.render(text, True, color)
@@ -78,29 +86,22 @@ class GameUI:
     def render():
         GameUI.gameDisplay.fill(GameUI.backgroundColor)
 
-        tableW = GameUI.tableSurface.get_width()
-        tableH = GameUI.tableSurface.get_height()
-        tableX = (GameUI.displayWidth - tableW) // 2
-        tableY = (GameUI.displayHeight - tableH) // 2
-        GameUI.gameDisplay.blit(GameUI.tableSurface, (tableX,tableY))
-
-        discardX = tableX + tableW // 2 - GameUI.cardWidthScaled // 2
-        discardY = tableY + tableH // 2 - GameUI.cardHeightScaled // 2
+        GameUI.gameDisplay.blit(GameUI.tableSurface, (GameUI.tableX, GameUI.tableY))
 
         GameUI.hand1.render(0, 450)
         GameUI.hand2.render(0, 50)
         GameUI.buttonDraw.render()
         #GameUI.discardPile.render(300, 200)
-        GameUI.discardPile.render(discardX, discardY)
+        GameUI.discardPile.render(GameUI.discardX, GameUI.discardY)
         GameUI.errorMsg.render(300, 250)
 
         pygame.display.update()
         # GameUI.clock.tick(GameUI.framerate)
 
     def incrementTurn():
-        GameUI.currentHand = GameUI.handList[GameUI.currentHandIndex]
         GameUI.currentHandIndex += 1
         GameUI.currentHandIndex %= len(GameUI.handList)
+        GameUI.currentHand = GameUI.handList[GameUI.currentHandIndex]
 
     def mainLoop():
         intro = True
