@@ -34,6 +34,9 @@ class GameUI:
     # the amount of space between each card in the UI
     handSpacing = math.floor(cardWidthScaled * 0.1)
 
+    handList = []
+    currentHandIndex = 0
+
     def textObjects(text, font):
         textSurface = font.render(text, True, GameUI.black)
         return textSurface, textSurface.get_rect()
@@ -65,23 +68,16 @@ class GameUI:
         GameUI.listButtons = []
         GameUI.listButtons.append(GameUI.buttonDraw)
 
+        GameUI.handList.append(GameUI.hand1)
+        GameUI.handList.append(GameUI.hand2)
+
+        GameUI.aiplayer = AIPlayer(GameUI.hand2)
+
+
     def mainLoop():
         intro = True
 
         while intro:
-            for event in pygame.event.get():
-                #print(event)
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    quit()
-
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    listClickableObjects = GameUI.listButtons + GameUI.playerHand.cards
-                    for x in listClickableObjects:
-                        if x.hover():
-                            x.action()
-                            break
-                    
             GameUI.gameDisplay.fill(GameUI.white)
 
             GameUI.hand1.render(0,450)
@@ -92,6 +88,30 @@ class GameUI:
 
             pygame.display.update()
             GameUI.clock.tick(GameUI.framerate)
+
+            currentHand = GameUI.handList[GameUI.currentHandIndex]
+
+            if currentHand == GameUI.playerHand:
+                for event in pygame.event.get():
+                    # print(event)
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        quit()
+
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+
+                        listClickableObjects = GameUI.listButtons + GameUI.playerHand.cards
+                        for x in listClickableObjects:
+                            if x.hover():
+                                x.action()
+                                break
+            elif currentHand == GameUI.aiplayer.hand:
+                GameUI.aiplayer.perform_turn()
+                # Increment turn
+                GameUI.currentHandIndex += 1
+                GameUI.currentHandIndex %= len(GameUI.handList)
+
+
 
 class ErrorMessage:
     def __init__(self, msg):
@@ -166,6 +186,10 @@ class Card(ClickableObj):
             self.hand.removeCard(self)
             GameUI.discardPile.addCard(self)
             GameUI.errorMsg.changeMsg("")
+
+            # Increment turn
+            GameUI.currentHandIndex += 1
+            GameUI.currentHandIndex %= len(GameUI.handList)
         else:
             GameUI.errorMsg.changeMsg("Error: that card is not playable!")
 
@@ -199,6 +223,22 @@ class Card(ClickableObj):
         r = random.randint(0, Card.maxRank)
         c = random.randint(0, Card.maxColor)
         return Card(r,c)
+
+class AIPlayer:
+    def __init__(self, hand):
+        self.hand = hand
+
+    def perform_turn(self):
+
+        # add a delay
+        pygame.time.wait(random.randrange(400, 1500))
+
+        # Choose the very first card. We'll do validation later
+        selectedcard = self.hand.cards[0]
+
+        self.hand.removeCard(selectedcard)
+        GameUI.discardPile.addCard(selectedcard)
+
 
 class DiscardPile:
     # size of the border around the discard pile
