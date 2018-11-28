@@ -6,7 +6,7 @@ from enum import Enum
 
 class GameUI:
     displayWidth = 800
-    displayHeight = 700
+    displayHeight = 620
     # maximum frames per second
     framerate = 15
      
@@ -31,8 +31,13 @@ class GameUI:
     cardWidthScaled = math.floor(cardScale * cardWidth)
     cardHeightScaled = math.floor(cardScale * cardHeight)
 
+    cardsPerRow = 14
+
     # the amount of space between each card in the UI
     handSpacing = math.floor(cardWidthScaled * 0.1)
+
+    # Number of cards in hand at the start of the game
+    numCardsStart = 7
 
     handList = []
     currentHandIndex = 0
@@ -47,17 +52,11 @@ class GameUI:
         GameUI.discardPile = DiscardPile()
 
         GameUI.hand1 = Hand("Player")
-        GameUI.hand1.addCard(Card(14,0))
-        GameUI.hand1.addCard(Card(0,0))
-        GameUI.hand1.addCard(Card(4,1))
-        GameUI.hand1.addCard(Card(12,2))
+        GameUI.hand1.dealCards()
 
         GameUI.hand2 = Hand("Robot")
-        GameUI.hand2.addCard(Card(14,0))
-        GameUI.hand2.addCard(Card(0,0))
-        GameUI.hand2.addCard(Card(4,1))
-        GameUI.hand2.addCard(Card(12,2))
-
+        GameUI.hand2.dealCards()        
+        
         GameUI.playerHand = GameUI.hand1
 
         GameUI.buttonDraw = Button((0,350,120,50))
@@ -236,7 +235,7 @@ class AIPlayer:
         GameUI.render()
         
         # add a delay for good looks
-        pygame.time.wait(random.randrange(400, 1500))
+        pygame.time.wait(random.randrange(500, 501))
 
         selectedcard = None
 
@@ -249,7 +248,7 @@ class AIPlayer:
         while not selectedcard:
             tempcard = self.hand.addRandomCard()
             GameUI.render()
-            pygame.time.wait(random.randrange(400, 600))
+            pygame.time.wait(random.randrange(500, 501))
             if GameUI.discardPile.isCardPlayable(tempcard):
                 selectedcard = tempcard
 
@@ -324,6 +323,10 @@ class Hand:
         self.cards.append(c)
         #print("numCards={}".format(self.getNumCards()))
 
+    def dealCards(self):
+        for i in range(0, GameUI.numCardsStart):
+            self.addRandomCard()
+
     def removeCard(self, c):
         for i in range(0,self.getNumCards()):
             curCard = self.cards[i]
@@ -332,12 +335,11 @@ class Hand:
                 break
 
     def render(self, x, y):
-        CARDS_PER_ROW = 10
         for i in range(0, self.getNumCards()):
             x_multiplier = GameUI.cardWidthScaled + GameUI.handSpacing
             y_multiplier = GameUI.cardHeightScaled + GameUI.handSpacing
-            x_offset = i % CARDS_PER_ROW
-            y_offset = i // CARDS_PER_ROW
+            x_offset = i % GameUI.cardsPerRow
+            y_offset = i // GameUI.cardsPerRow
             self.cards[i].render(x + x_offset*x_multiplier,
                 y + y_offset*y_multiplier)
 
