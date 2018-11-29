@@ -43,21 +43,25 @@ class GameUI:
 
     currentHandIndex = 0
     currentHand = None
-    gameWinner = None
+    
+
+    centerX = displayWidth // 2
+    centerY = displayHeight // 2
 
     tableW = tableSurface.get_width()
     tableH = tableSurface.get_height()
-    tableX = (displayWidth - tableW) // 2
-    tableY = (displayHeight - tableH) // 2
+    tableX = centerX - tableW // 2
+    tableY = centerY - tableH // 2
 
-    discardX = tableX + tableW // 2 - cardWidthScaled // 2
-    discardY = tableY + tableH // 2 - cardHeightScaled // 2
+    discardX = centerX - cardWidthScaled // 2
+    discardY = centerY - cardHeightScaled // 2
 
     def textObjects(text, font, color):
         textSurface = font.render(text, True, color)
         return textSurface, textSurface.get_rect()
 
     def initHands():
+        GameUI.gameWinner = None
         GameUI.errorMsg = ErrorMessage("")
         GameUI.discardPile = DiscardPile()
 
@@ -83,10 +87,10 @@ class GameUI:
         GameUI.buttonDraw.color_active = GameUI.brightGreen
         GameUI.buttonDraw.action = GameUI.hand1.addRandomCard
 
-        GameUI.buttonNewGame = Button((GameUI.discardX ,350,120,50))
+        GameUI.buttonNewGame = Button((GameUI.centerX-60, GameUI.centerY+29, 120, 50))
         GameUI.buttonNewGame.msg = "New game"
-        GameUI.buttonNewGame.color_inactive = GameUI.green
-        GameUI.buttonNewGame.color_active = GameUI.brightGreen
+        GameUI.buttonNewGame.color_inactive = GameUI.red
+        GameUI.buttonNewGame.color_active = GameUI.brightRed
         GameUI.buttonNewGame.action = GameUI.initHands
 
         GameUI.listButtons = []
@@ -109,7 +113,7 @@ class GameUI:
         # GameUI.clock.tick(GameUI.framerate)
 
     def renderWinOverlay():
-        GameUI.errorMsg.changeMsg("Player X won the game!")
+        GameUI.errorMsg.changeMsg(GameUI.gameWinner.name + " won the game!")
         GameUI.buttonNewGame.render()
         pygame.display.update()
 
@@ -124,6 +128,7 @@ class GameUI:
         while intro:
             GameUI.render()
             if GameUI.gameWinner is not None:
+            #if True:
                 GameUI.renderWinOverlay()
             pygame.display.update()
 
@@ -154,7 +159,7 @@ class ErrorMessage:
 
     def render(self, x, y):
         largeText = pygame.font.Font('sans.ttf', 30)
-        TextSurf, TextRect = GameUI.textObjects(self.msg, largeText, GameUI.white)
+        TextSurf, TextRect = GameUI.textObjects(self.msg, largeText, GameUI.red)
         TextRect.center = (x, y)
         GameUI.gameDisplay.blit(TextSurf, TextRect)
 
@@ -227,6 +232,8 @@ class Card(ClickableObj):
         else:
             GameUI.errorMsg.changeMsg("Error: that card is not playable!")
 
+        self.hand.checkWinCon()
+
     # get the Coordintes of the card on the image
     def getCoords(self):
         if self.rank == 14:
@@ -288,6 +295,9 @@ class AIPlayer:
         self.hand.removeCard(selectedcard)
         GameUI.discardPile.addCard(selectedcard)
 
+        # Check win condition
+        self.hand.checkWinCon()
+
         # Increment turn
         GameUI.incrementTurn()
 
@@ -303,7 +313,8 @@ class DiscardPile:
     def addCard(self, c):
         self.topCard = c
         if c.isWild():
-            self.currentColor = 0
+            # self.currentColor = 0
+            self.currentColor = random.randint(0, Card.maxColor)
         else:
             self.currentColor = c.color
 
@@ -350,6 +361,10 @@ class Hand:
 
     def getNumCards(self):
         return len(self.cards)
+
+    def checkWinCon(self):
+        if self.getNumCards() == 0:
+            GameUI.gameWinner = self
 
     def addCard(self, c):
         c.hand = self
