@@ -237,16 +237,10 @@ class Card(ClickableObj):
     # the action to execute when the card is clicked
     def action(self):
         #print("Card clicked: {0}".format(self))
-
         if GameUI.discardPile.isCardPlayable(self):
-            self.hand.removeCard(self)
-            GameUI.discardPile.addCard(self)
             GameUI.errorMsg.changeMsg("")
 
-            GameUI.getNextHand().doSpecialAction(self.getAction())
-
-            self.hand.checkWinCon()
-            GameUI.incrementTurn()
+            self.hand.playCard(self)
         else:
             GameUI.errorMsg.changeMsg("Error: that card is not playable!")
 
@@ -309,17 +303,7 @@ class AIPlayer:
             if GameUI.discardPile.isCardPlayable(tempcard):
                 selectedcard = tempcard
 
-        self.hand.removeCard(selectedcard)
-        GameUI.discardPile.addCard(selectedcard)
-
-        # draw2, draw4, etc.
-        GameUI.getNextHand().doSpecialAction(selectedcard.getAction())
-
-        # Check win condition
-        self.hand.checkWinCon()
-
-        # Increment turn
-        GameUI.incrementTurn()
+        self.hand.playCard(selectedcard)
 
 
 class DiscardPile:
@@ -385,6 +369,13 @@ class Hand:
     def checkWinCon(self):
         if self.getNumCards() == 0:
             GameUI.gameWinner = self
+
+    def playCard(self, card):
+        self.removeCard(card)
+        GameUI.discardPile.addCard(card)
+        GameUI.getNextHand().doSpecialAction(card.getAction())
+        self.checkWinCon()
+        GameUI.incrementTurn()
 
     def doSpecialAction(self, ac):
         if ac is None:
