@@ -14,6 +14,7 @@ Implemented so far:
 
 Things to implement:  
 * Announce ONU  
+* Only show card back for AI Player
 
 Canceled features:  
 * For wild cards, must have UI element for player to select the color  
