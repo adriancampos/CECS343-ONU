@@ -20,7 +20,6 @@ class GameUI:
     brightYellow = (255,255,0)
     backgroundColor = (15,40,15)
 
-    gameDisplay = pygame.display.set_mode((displayWidth,displayHeight))
     pygame.display.set_caption('ONU')
     clock = pygame.time.Clock()
      
@@ -33,28 +32,43 @@ class GameUI:
     cardWidthScaled = math.floor(cardScale * cardWidth)
     cardHeightScaled = math.floor(cardScale * cardHeight)
 
-    cardsPerRow = 14
 
     # the amount of space between each card in the UI
     handSpacing = math.floor(cardWidthScaled * 0.1)
+
+    # the minimum height of hand1
+    handHeight = 170
+
+    # button coordinates
+    buttonDrawHeight = 50
+    buttonDrawWidth = 120
+    buttonDrawLeft = 0
+    buttonDrawBottom = handHeight + buttonDrawHeight + 40  # include some margin
 
     # Number of cards in hand at the start of the game
     numCardsStart = 7
 
     currentHandIndex = 0
     currentHand = None
-    
 
-    centerX = displayWidth // 2
-    centerY = displayHeight // 2
 
-    tableW = tableSurface.get_width()
-    tableH = tableSurface.get_height()
-    tableX = centerX - tableW // 2
-    tableY = centerY - tableH // 2
 
-    discardX = centerX - cardWidthScaled // 2
-    discardY = centerY - cardHeightScaled // 2
+
+    def computeSizes():
+        GameUI.gameDisplay = pygame.display.set_mode((GameUI.displayWidth, GameUI.displayHeight), pygame.RESIZABLE)
+
+        GameUI.centerX = GameUI.displayWidth // 2
+        GameUI.centerY = GameUI.displayHeight // 2
+
+        GameUI.tableW = GameUI.tableSurface.get_width()
+        GameUI.tableH = GameUI.tableSurface.get_height()
+        GameUI.tableX = GameUI.centerX - GameUI.tableW // 2
+        GameUI.tableY = GameUI.centerY - GameUI.tableH // 2
+
+        GameUI.discardX = GameUI.centerX - GameUI.cardWidthScaled // 2
+        GameUI.discardY = GameUI.centerY - GameUI.cardHeightScaled // 2
+
+        GameUI.cardsPerRow = math.floor(GameUI.displayWidth / (GameUI.cardWidthScaled + GameUI.handSpacing))
 
     def textObjects(text, font, color):
         textSurface = font.render(text, True, color)
@@ -81,7 +95,7 @@ class GameUI:
     def initGame():
         GameUI.initHands()
         
-        GameUI.buttonDraw = Button((0,350,120,50))
+        GameUI.buttonDraw = Button((GameUI.buttonDrawLeft,350,120,50))
         GameUI.buttonDraw.msg = "Draw card"
         GameUI.buttonDraw.color_inactive = GameUI.green
         GameUI.buttonDraw.color_active = GameUI.brightGreen
@@ -102,8 +116,9 @@ class GameUI:
 
         GameUI.gameDisplay.blit(GameUI.tableSurface, (GameUI.tableX, GameUI.tableY))
 
-        GameUI.hand1.render(0, 450)
+        GameUI.hand1.render(0, GameUI.displayHeight - GameUI.handHeight)
         GameUI.hand2.render(0, 50)
+        GameUI.buttonDraw.rect = pygame.Rect(GameUI.buttonDrawLeft, GameUI.displayHeight - GameUI.buttonDrawBottom, GameUI.buttonDrawWidth, GameUI.buttonDrawHeight)
         GameUI.buttonDraw.render()
         #GameUI.discardPile.render(300, 200)
         GameUI.discardPile.render(GameUI.discardX, GameUI.discardY)
@@ -146,6 +161,15 @@ class GameUI:
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         quit()
+
+                    if event.type == pygame.VIDEORESIZE:
+                        # set our constants accordingly
+                        GameUI.displayWidth = event.w
+                        GameUI.displayHeight = event.h
+                        GameUI.computeSizes()
+                        # There's some code to add back window content here.
+                        surface = pygame.display.set_mode((event.w, event.h),
+                                                          pygame.RESIZABLE)
 
                     elif event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -463,6 +487,7 @@ def main():
     pygame.init()
     pygame.font.init()
 
+    GameUI.computeSizes()
     GameUI.initGame()
     GameUI.mainLoop()
 
