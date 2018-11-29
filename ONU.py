@@ -91,7 +91,7 @@ class GameUI:
         GameUI.buttonNewGame.msg = "New game"
         GameUI.buttonNewGame.color_inactive = GameUI.red
         GameUI.buttonNewGame.color_active = GameUI.brightRed
-        GameUI.buttonNewGame.action = GameUI.initHands
+        GameUI.buttonNewGame.action = GameUI.initGame
 
         GameUI.listButtons = []
         GameUI.listButtons.append(GameUI.buttonDraw)
