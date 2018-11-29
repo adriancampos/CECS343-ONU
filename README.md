@@ -10,10 +10,10 @@ Implemented so far:
 * When rendering hand, there might be more than 1 row of cards. Must specify the amount of cards in each row
 * Change wild card to random color selection  
 * End of game detection  
+* Functionality of special cards: draw 2, skip, etc.  
 
 Things to implement:  
 * Announce ONU  
-* Functionality of special cards: draw 2, skip, etc.  
 
 Canceled features:  
 * For wild cards, must have UI element for player to select the color  

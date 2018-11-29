@@ -122,6 +122,12 @@ class GameUI:
         GameUI.currentHandIndex %= len(GameUI.handList)
         GameUI.currentHand = GameUI.handList[GameUI.currentHandIndex]
 
+    # return the hand of the player who is going next.
+    def getNextHand():
+        nextHandIndex = GameUI.currentHandIndex + 1
+        nextHandIndex %= len(GameUI.handList)
+        return GameUI.handList[nextHandIndex]
+
     def mainLoop():
         intro = True
 
@@ -218,6 +224,16 @@ class Card(ClickableObj):
     def isWild(self):
         return (self.rank == 13) or (self.rank == 14)
 
+    def getAction(self):
+        if self.rank == 10:
+            return "skip"
+        elif self.rank == 12:
+            return "draw2"
+        elif self.rank == 14:
+            return "draw4"
+        else:
+            return None
+
     # the action to execute when the card is clicked
     def action(self):
         #print("Card clicked: {0}".format(self))
@@ -227,12 +243,13 @@ class Card(ClickableObj):
             GameUI.discardPile.addCard(self)
             GameUI.errorMsg.changeMsg("")
 
-            # Increment turn
+            GameUI.getNextHand().doSpecialAction(self.getAction())
+
+            self.hand.checkWinCon()
             GameUI.incrementTurn()
         else:
             GameUI.errorMsg.changeMsg("Error: that card is not playable!")
 
-        self.hand.checkWinCon()
 
     # get the Coordintes of the card on the image
     def getCoords(self):
@@ -294,6 +311,9 @@ class AIPlayer:
 
         self.hand.removeCard(selectedcard)
         GameUI.discardPile.addCard(selectedcard)
+
+        # draw2, draw4, etc.
+        GameUI.getNextHand().doSpecialAction(selectedcard.getAction())
 
         # Check win condition
         self.hand.checkWinCon()
@@ -365,6 +385,28 @@ class Hand:
     def checkWinCon(self):
         if self.getNumCards() == 0:
             GameUI.gameWinner = self
+
+    def doSpecialAction(self, ac):
+        if ac is None:
+            return
+        elif ac == "draw4":
+            for i in range(0,4):
+                self.drawAndDelay()
+        elif ac == "draw2":
+            for i in range(0,2):
+                self.drawAndDelay()
+        elif ac == "skip":
+            # do nothing
+            pass
+        else:
+            print("Error: invalid action")
+        GameUI.incrementTurn()
+
+    def drawAndDelay(self):
+        pygame.time.wait(random.randrange(500, 501))
+        self.addRandomCard()
+        GameUI.render()
+        pygame.display.update()
 
     def addCard(self, c):
         c.hand = self
