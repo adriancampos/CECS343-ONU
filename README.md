@@ -13,9 +13,9 @@ Implemented so far:
 * Functionality of special cards: draw 2, skip, etc.  
 
 Things to implement:  
-* Announce ONU  
-* Only show card back for AI Player
+* Only show card back for AI Player. Have the game enter debug mode when the user presses 'd' on keyboard.
+In debug mode, the UI shows the cards in the AI player's hand.  
 
 Canceled features:  
+* Announce ONU  
 * For wild cards, must have UI element for player to select the color  
-
