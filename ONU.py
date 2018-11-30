@@ -26,6 +26,7 @@ class GameUI:
     cardsSurface = pygame.image.load('UNO_cards_deck.png')
     cardsHighlight = pygame.image.load('UNO_cards_deck_brighter2.png')
     tableSurface = pygame.image.load('poker_table.png')
+    cardBackSurface = pygame.image.load('ONU_card_back.png')
     cardWidth = 240
     cardHeight = 360
     cardScale = 0.2
@@ -46,9 +47,6 @@ class GameUI:
 
     # Number of cards in hand at the start of the game
     numCardsStart = 7
-
-    currentHandIndex = 0
-    currentHand = None
 
     def computeSizes():
         GameUI.gameDisplay = pygame.display.set_mode((GameUI.displayWidth, GameUI.displayHeight), pygame.RESIZABLE)
@@ -78,10 +76,10 @@ class GameUI:
         GameUI.errorMsg = ErrorMessage("")
         GameUI.discardPile = DiscardPile()
 
-        GameUI.hand1 = Hand("Player1")
+        GameUI.hand1 = Hand("Player1", False)
         GameUI.hand1.dealCards()
 
-        GameUI.hand2 = Hand("Robot")
+        GameUI.hand2 = Hand("Robot", True)
         GameUI.hand2.dealCards()        
         
         GameUI.playerHand = GameUI.hand1
@@ -93,6 +91,11 @@ class GameUI:
 
     def initGame():
         GameUI.initHands()
+
+        GameUI.currentHandIndex = 0
+        GameUI.currentHand = None
+
+        GameUI.hideCards = True
         
         GameUI.centerX = GameUI.displayWidth // 2
         GameUI.centerY = GameUI.displayHeight // 2
@@ -160,12 +163,17 @@ class GameUI:
 
             if GameUI.currentHand == GameUI.playerHand:
                 for event in pygame.event.get():
-                    # print(event)
+                    #print(event)
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         quit()
 
-                    if event.type == pygame.VIDEORESIZE:
+                    elif event.type == pygame.KEYDOWN:
+                        pressed = pygame.key.get_pressed()
+                        if pressed[pygame.K_d]:
+                            GameUI.hideCards = not GameUI.hideCards
+
+                    elif event.type == pygame.VIDEORESIZE:
                         # set our constants accordingly
                         GameUI.displayWidth = event.w
                         GameUI.displayHeight = event.h
@@ -285,15 +293,19 @@ class Card(ClickableObj):
         # x_offset, y_offset, width, height
         return pygame.Rect(w*x, h*y, w+pixelAdjust, h+pixelAdjust)
 
-    def render(self, x, y):
-        self.rect = pygame.Rect(x, y, GameUI.cardWidthScaled, GameUI.cardHeightScaled)
-        if self.hover():
-            surfaceSelected = GameUI.cardsHighlight
+    def render(self, x, y):        
+        if self.hand is not None and self.hand.hideCards and GameUI.hideCards:
+            # render card back
+            cropped = GameUI.cardBackSurface
+            cropped = pygame.transform.smoothscale(cropped, (GameUI.cardWidthScaled, GameUI.cardHeightScaled))            
         else:
-            surfaceSelected = GameUI.cardsSurface
-
-        cropped = surfaceSelected.subsurface(self.getCoords()).copy()
-        cropped = pygame.transform.smoothscale(cropped, (GameUI.cardWidthScaled, GameUI.cardHeightScaled))
+            self.rect = pygame.Rect(x, y, GameUI.cardWidthScaled, GameUI.cardHeightScaled)
+            if self.hover():
+                surfaceSelected = GameUI.cardsHighlight
+            else:
+                surfaceSelected = GameUI.cardsSurface
+            cropped = surfaceSelected.subsurface(self.getCoords()).copy()
+            cropped = pygame.transform.smoothscale(cropped, (GameUI.cardWidthScaled, GameUI.cardHeightScaled))
         GameUI.gameDisplay.blit(cropped, (x,y))
 
     def getRandomCard():
@@ -376,9 +388,10 @@ class DiscardPile:
         self.topCard.render(x, y)
 
 class Hand:
-    def __init__(self, name):
+    def __init__(self, name, hideCards):
         self.cards = []
         self.name = name
+        self.hideCards = hideCards
 
     def __str__(self):
         ret = "<Hand "
@@ -398,6 +411,7 @@ class Hand:
     def playCard(self, card):
         self.removeCard(card)
         GameUI.discardPile.addCard(card)
+        card.hand = None
         GameUI.getNextHand().doSpecialAction(card.getAction())
         self.checkWinCon()
         GameUI.incrementTurn()
