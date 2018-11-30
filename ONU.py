@@ -32,7 +32,6 @@ class GameUI:
     cardWidthScaled = math.floor(cardScale * cardWidth)
     cardHeightScaled = math.floor(cardScale * cardHeight)
 
-
     # the amount of space between each card in the UI
     handSpacing = math.floor(cardWidthScaled * 0.1)
 
@@ -79,7 +78,7 @@ class GameUI:
         GameUI.errorMsg = ErrorMessage("")
         GameUI.discardPile = DiscardPile()
 
-        GameUI.hand1 = Hand("Player")
+        GameUI.hand1 = Hand("Player1")
         GameUI.hand1.dealCards()
 
         GameUI.hand2 = Hand("Robot")
@@ -97,14 +96,14 @@ class GameUI:
         
         GameUI.centerX = GameUI.displayWidth // 2
         GameUI.centerY = GameUI.displayHeight // 2
-        
-        GameUI.buttonDraw = Button((GameUI.buttonDrawLeft,350,120,50))
+
+        GameUI.buttonDraw = Button((GameUI.buttonDrawLeft, GameUI.displayHeight - GameUI.buttonDrawBottom, GameUI.buttonDrawWidth, GameUI.buttonDrawHeight))
         GameUI.buttonDraw.msg = "Draw card"
         GameUI.buttonDraw.color_inactive = GameUI.green
         GameUI.buttonDraw.color_active = GameUI.brightGreen
         GameUI.buttonDraw.action = GameUI.hand1.addRandomCard
 
-        GameUI.buttonNewGame = Button((GameUI.centerX-60, GameUI.centerY+29, 120, 50))
+        GameUI.buttonNewGame = Button((GameUI.centerX - GameUI.buttonDrawWidth // 2, GameUI.displayHeight - GameUI.buttonDrawBottom, GameUI.buttonDrawWidth, GameUI.buttonDrawHeight))
         GameUI.buttonNewGame.msg = "New game"
         GameUI.buttonNewGame.color_inactive = GameUI.red
         GameUI.buttonNewGame.color_active = GameUI.brightRed
@@ -116,18 +115,17 @@ class GameUI:
 
     def render():
         GameUI.gameDisplay.fill(GameUI.backgroundColor)
-
         GameUI.gameDisplay.blit(GameUI.tableSurface, (GameUI.tableX, GameUI.tableY))
 
         GameUI.hand1.render(0, GameUI.displayHeight - GameUI.handHeight)
-        GameUI.hand2.render(0, 50)
+        GameUI.hand2.render(0, 30)
 
         GameUI.buttonDraw.render()
         
         GameUI.discardPile.render(GameUI.discardX, GameUI.discardY)
         GameUI.errorMsg.render(GameUI.displayWidth // 2, GameUI.displayHeight // 2)
 
-        #pygame.display.update()
+        # pygame.display.update()
         # GameUI.clock.tick(GameUI.framerate)
 
     def renderWinOverlay():
@@ -148,7 +146,7 @@ class GameUI:
 
     def mainLoop():
         intro = True
-        winOverlayDebug = True
+        winOverlayDebug = False
 
         while intro:
             GameUI.render()
@@ -185,8 +183,6 @@ class GameUI:
                                 break
             elif GameUI.currentHand == GameUI.aiplayer.hand:
                 GameUI.aiplayer.perform_turn()
-
-
 
 class ErrorMessage:
     def __init__(self, msg):
@@ -273,7 +269,6 @@ class Card(ClickableObj):
         else:
             GameUI.errorMsg.changeMsg("Error: that card is not playable!")
 
-
     # get the Coordintes of the card on the image
     def getCoords(self):
         if self.rank == 14:
@@ -284,9 +279,10 @@ class Card(ClickableObj):
             x = self.rank
             y = self.color
         pixelAdjust = 2 # need to add small amount to avoid cut-off edges
-        # x_offset, y_offset, width, height
+        
         w = GameUI.cardWidth
         h = GameUI.cardHeight
+        # x_offset, y_offset, width, height
         return pygame.Rect(w*x, h*y, w+pixelAdjust, h+pixelAdjust)
 
     def render(self, x, y):
