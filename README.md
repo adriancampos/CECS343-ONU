@@ -1,6 +1,6 @@
 # CECS343 Project: ONU
 
-Implemented so far:  
+Current features:  
 * Clickable cards  
 * Draw a card button - add random card to hand  
 * Discard pile  
@@ -11,10 +11,10 @@ Implemented so far:
 * Change wild card to random color selection  
 * End of game detection  
 * Functionality of special cards: draw 2, skip, etc.  
-
-Things to implement:  
-* Only show card back for AI Player. Have the game enter debug mode when the user presses 'd' on keyboard.
+* Only show card back for AI Player. Have the game enter debug mode when the user presses 'D' on keyboard.
 In debug mode, the UI shows the cards in the AI player's hand.  
+
+Features to implement:  
 
 Canceled features:  
 * Announce ONU  
