@@ -51,9 +51,6 @@ class GameUI:
     currentHandIndex = 0
     currentHand = None
 
-
-
-
     def computeSizes():
         GameUI.gameDisplay = pygame.display.set_mode((GameUI.displayWidth, GameUI.displayHeight), pygame.RESIZABLE)
 
@@ -69,6 +66,9 @@ class GameUI:
         GameUI.discardY = GameUI.centerY - GameUI.cardHeightScaled // 2
 
         GameUI.cardsPerRow = math.floor(GameUI.displayWidth / (GameUI.cardWidthScaled + GameUI.handSpacing))
+
+        GameUI.buttonDraw.rect = pygame.Rect(GameUI.buttonDrawLeft, GameUI.displayHeight - GameUI.buttonDrawBottom, GameUI.buttonDrawWidth, GameUI.buttonDrawHeight)
+        GameUI.buttonNewGame.rect = pygame.Rect(GameUI.centerX - GameUI.buttonDrawWidth // 2, GameUI.displayHeight - GameUI.buttonDrawBottom, GameUI.buttonDrawWidth, GameUI.buttonDrawHeight)
 
     def textObjects(text, font, color):
         textSurface = font.render(text, True, color)
@@ -95,6 +95,9 @@ class GameUI:
     def initGame():
         GameUI.initHands()
         
+        GameUI.centerX = GameUI.displayWidth // 2
+        GameUI.centerY = GameUI.displayHeight // 2
+        
         GameUI.buttonDraw = Button((GameUI.buttonDrawLeft,350,120,50))
         GameUI.buttonDraw.msg = "Draw card"
         GameUI.buttonDraw.color_inactive = GameUI.green
@@ -118,9 +121,9 @@ class GameUI:
 
         GameUI.hand1.render(0, GameUI.displayHeight - GameUI.handHeight)
         GameUI.hand2.render(0, 50)
-        GameUI.buttonDraw.rect = pygame.Rect(GameUI.buttonDrawLeft, GameUI.displayHeight - GameUI.buttonDrawBottom, GameUI.buttonDrawWidth, GameUI.buttonDrawHeight)
+
         GameUI.buttonDraw.render()
-        #GameUI.discardPile.render(300, 200)
+        
         GameUI.discardPile.render(GameUI.discardX, GameUI.discardY)
         GameUI.errorMsg.render(GameUI.displayWidth // 2, GameUI.displayHeight // 2)
 
@@ -145,11 +148,13 @@ class GameUI:
 
     def mainLoop():
         intro = True
+        winOverlayDebug = True
 
         while intro:
             GameUI.render()
-            if GameUI.gameWinner is not None:
-            #if True:
+            if (GameUI.gameWinner is not None) or winOverlayDebug:
+                if winOverlayDebug:
+                    GameUI.gameWinner = GameUI.playerHand
                 GameUI.renderWinOverlay()
             pygame.display.update()
 
@@ -487,8 +492,8 @@ def main():
     pygame.init()
     pygame.font.init()
 
-    GameUI.computeSizes()
     GameUI.initGame()
+    GameUI.computeSizes()
     GameUI.mainLoop()
 
     pygame.quit()
