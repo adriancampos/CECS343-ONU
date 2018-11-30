@@ -296,17 +296,16 @@ class Card(ClickableObj):
     def render(self, x, y):        
         if self.hand is not None and self.hand.hideCards and GameUI.hideCards:
             # render card back
-            cropped = GameUI.cardBackSurface
-            cropped = pygame.transform.smoothscale(cropped, (GameUI.cardWidthScaled, GameUI.cardHeightScaled))            
+            cardSubsurface = GameUI.cardBackSurface
         else:
             self.rect = pygame.Rect(x, y, GameUI.cardWidthScaled, GameUI.cardHeightScaled)
             if self.hover():
                 surfaceSelected = GameUI.cardsHighlight
             else:
                 surfaceSelected = GameUI.cardsSurface
-            cropped = surfaceSelected.subsurface(self.getCoords()).copy()
-            cropped = pygame.transform.smoothscale(cropped, (GameUI.cardWidthScaled, GameUI.cardHeightScaled))
-        GameUI.gameDisplay.blit(cropped, (x,y))
+            cardSubsurface = surfaceSelected.subsurface(self.getCoords()).copy()
+        scaledSurface = pygame.transform.smoothscale(cardSubsurface, (GameUI.cardWidthScaled, GameUI.cardHeightScaled))
+        GameUI.gameDisplay.blit(scaledSurface, (x,y))
 
     def getRandomCard():
         r = random.randint(0, Card.maxRank)
