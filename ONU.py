@@ -129,7 +129,7 @@ class GameUI:
         GameUI.errorMsg.render(GameUI.displayWidth // 2, GameUI.displayHeight // 2)
 
         # pygame.display.update()
-        # GameUI.clock.tick(GameUI.framerate)
+        GameUI.clock.tick(GameUI.framerate)
 
     def renderWinOverlay():
         GameUI.errorMsg.changeMsg(GameUI.gameWinner.name + " won the game!")
@@ -147,13 +147,16 @@ class GameUI:
         nextHandIndex %= len(GameUI.handList)
         return GameUI.handList[nextHandIndex]
 
+    def isGameOver():
+        return GameUI.gameWinner is not None
+
     def mainLoop():
         intro = True
         winOverlayDebug = False
 
         while intro:
             GameUI.render()
-            if (GameUI.gameWinner is not None) or winOverlayDebug:
+            if GameUI.isGameOver() or winOverlayDebug:
                 if winOverlayDebug:
                     GameUI.gameWinner = GameUI.playerHand
                 GameUI.renderWinOverlay()
@@ -271,6 +274,8 @@ class Card(ClickableObj):
     # the action to execute when the card is clicked
     def action(self):
         #print("Card clicked: {0}".format(self))
+        if GameUI.isGameOver():
+            return
         if GameUI.discardPile.isCardPlayable(self):
             GameUI.errorMsg.changeMsg("")
 
@@ -318,6 +323,9 @@ class AIPlayer:
         self.hand = hand
 
     def perform_turn(self):
+        if GameUI.isGameOver():
+            return
+
         GameUI.render()
         pygame.display.update()
         
