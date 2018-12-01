@@ -181,6 +181,7 @@ class GameUI:
                         # There's some code to add back window content here.
                         surface = pygame.display.set_mode((event.w, event.h),
                                                           pygame.RESIZABLE)
+                        pygame.display.set_caption('ONU')
 
                     elif event.type == pygame.MOUSEBUTTONDOWN:
 
