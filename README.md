@@ -1,6 +1,21 @@
-# CECS343 Project: ONU
+# ONU
 
-Current features:  
+## How to Run
+Ensure you have all of the perquisites, then
+```
+python ONU.py
+```
+
+## How To Build
+```
+pip install pyinstaller
+pyinstaller ONU.spec
+```
+An executable will be generated at `dist/ONU.exe`.
+
+
+## Features
+### Current features
 * Clickable cards  
 * Draw a card button - add random card to hand  
 * Discard pile  
@@ -14,8 +29,8 @@ Current features:
 * Only show card back for AI Player. Have the game enter debug mode when the user presses 'D' on keyboard.
 In debug mode, the UI shows the cards in the AI player's hand.  
 
-Features to implement:  
+### Features to implement
 
-Canceled features:  
+### Canceled features
 * Announce ONU  
 * For wild cards, must have UI element for player to select the color  

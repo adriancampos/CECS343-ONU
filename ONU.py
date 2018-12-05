@@ -3,6 +3,8 @@ import time
 import random
 import math
 from enum import Enum
+import os
+import sys
 
 class GameUI:
     displayWidth = 800
@@ -22,11 +24,17 @@ class GameUI:
 
     pygame.display.set_caption('ONU')
     clock = pygame.time.Clock()
-     
-    cardsSurface = pygame.image.load('UNO_cards_deck.png')
-    cardsHighlight = pygame.image.load('UNO_cards_deck_brighter2.png')
-    tableSurface = pygame.image.load('poker_table.png')
-    cardBackSurface = pygame.image.load('ONU_card_back.png')
+
+    # Get path for assets. Might be bundled (if running in an executable), might be local
+    if getattr(sys, 'frozen', False):
+        Path = sys._MEIPASS  # This is for when the program is frozen
+    else:
+        Path = os.path.dirname(__file__)  # This is when the program normally runs
+
+    cardsSurface = pygame.image.load(os.path.join(Path, 'UNO_cards_deck.png'))
+    cardsHighlight = pygame.image.load(os.path.join(Path, 'UNO_cards_deck_brighter2.png'))
+    tableSurface = pygame.image.load(os.path.join(Path, 'poker_table.png'))
+    cardBackSurface = pygame.image.load(os.path.join(Path, 'ONU_card_back.png'))
     cardWidth = 240
     cardHeight = 360
     cardScale = 0.2
@@ -201,7 +209,7 @@ class ErrorMessage:
         self.msg = msg
 
     def render(self, x, y):
-        largeText = pygame.font.Font('sans.ttf', 30)
+        largeText = pygame.font.Font(os.path.join(GameUI.Path, 'sans.ttf'), 30)
         TextSurf, TextRect = GameUI.textObjects(self.msg, largeText, GameUI.red)
         TextRect.center = (x, y)
         GameUI.gameDisplay.blit(TextSurf, TextRect)
@@ -477,7 +485,7 @@ class Hand:
             textColor = GameUI.white
 
         # render the name
-        smallText = pygame.font.Font('sans.ttf',20)
+        smallText = pygame.font.Font(os.path.join(GameUI.Path, 'sans.ttf'),20)
         textSurf, textRect = GameUI.textObjects(self.name, smallText, textColor)
         textRect.left = x
         textRect.bottom = y
@@ -501,7 +509,7 @@ class Button(ClickableObj):
             color_selected = self.color_inactive
         pygame.draw.rect(GameUI.gameDisplay, color_selected, self.rect)
 
-        smallText = pygame.font.Font('sans.ttf',20)
+        smallText = pygame.font.Font(os.path.join(GameUI.Path, 'sans.ttf'),20)
         textSurf, textRect = GameUI.textObjects(self.msg, smallText, GameUI.black)
         textRect.center = ( (x+(w/2)), (y+(h/2)) )
         GameUI.gameDisplay.blit(textSurf, textRect)
