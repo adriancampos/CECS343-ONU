@@ -1,6 +1,9 @@
 # ONU
 
 ## How to Run
+### Excecutable
+[Download](https://github.com/adriancampos/CECS343-ONU/releases/latest) the latest excecutable and run it.
+### Python
 Ensure you have all of the perquisites, then
 ```
 python ONU.py
